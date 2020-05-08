@@ -27,6 +27,7 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -185,9 +186,11 @@ class NavigationActivity : BaseRouterActivity(), Navigation, MasqueradingDialog.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("TAG", "NavigationActivity | onCreate")
         super.onCreate(savedInstanceState)
         val masqueradingUserId: Long = intent.getLongExtra(Const.QR_CODE_MASQUERADE_ID, 0L)
         if (masqueradingUserId != 0L) {
+            Log.d("TAG", "NavigationActivity | onCreate | masqueradingUserId is NOT 0")
             MasqueradeHelper.startMasquerading(masqueradingUserId, ApiPrefs.domain, NavigationActivity::class.java)
         }
 
@@ -203,18 +206,24 @@ class NavigationActivity : BaseRouterActivity(), Navigation, MasqueradingDialog.
     }
 
     override fun initialCoreDataLoadingComplete() {
+        Log.d("TAG", "NavigationActivity | initialCoreDataLoadingComplete")
         // Send updated info to Flutter
         FlutterComm.sendUpdatedLogin()
         FlutterComm.sendUpdatedTheme()
 
         // We are ready to load our UI
         if (currentFragment == null) {
+            Log.d("TAG", "NavigationActivity | initialCoreDataLoadingComplete | currentFragment is NULL")
             loadLandingPage(true)
         }
 
         // Make sure we are either masquerading or we aren't - there's a case where we are in the middle of getting the Test User, or the user we want to masquerade as,
         // and we do the above check if the user is null and logging out before getting the User information back
+        Log.d("TAG", "NavigationActivity | ApiPrefs.user: ${ApiPrefs.user}")
+        Log.d("TAG", "NavigationActivity | ApiPrefs.isMasquerading: ${ApiPrefs.isMasquerading}")
+        Log.d("TAG", "NavigationActivity | ApiPrefs.isStudentView: ${ApiPrefs.isStudentView}")
         if (ApiPrefs.user == null && ((ApiPrefs.isMasquerading && ApiPrefs.isStudentView) || (!ApiPrefs.isMasquerading && !ApiPrefs.isStudentView))) {
+            Log.d("TAG", "NavigationActivity | initialCoreDataLoadingComplete | No user and not masquerading or in student view")
             // Hard case to repro but it's possible for a user to force exit the app before we finish saving the user but they will still launch into the app
             // If that happens, log out
             StudentLogoutTask(LogoutTask.Type.LOGOUT).execute()
@@ -261,6 +270,7 @@ class NavigationActivity : BaseRouterActivity(), Navigation, MasqueradingDialog.
     }
 
     override fun loadLandingPage(clearBackStack: Boolean) {
+        Log.d("TAG", "NavigationActivity | loadLandingPage")
         if (clearBackStack) clearBackStack(DashboardFragment::class.java)
         val dashboardRoute = DashboardFragment.makeRoute(ApiPrefs.user)
         addFragment(DashboardFragment.newInstance(dashboardRoute), dashboardRoute)
@@ -650,6 +660,7 @@ class NavigationActivity : BaseRouterActivity(), Navigation, MasqueradingDialog.
     }
 
     override fun handleRoute(route: Route) {
+        Log.d("TAG", "NavigationActivity | handleRoute")
         if (routeJob?.isActive == true) return
 
         routeJob = tryWeave {

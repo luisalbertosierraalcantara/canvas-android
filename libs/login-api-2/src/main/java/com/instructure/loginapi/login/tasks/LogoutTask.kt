@@ -82,7 +82,7 @@ abstract class LogoutTask(val type: Type, val uri: Uri? = null) {
                 }
 
                 // Clean up masquerading
-                MasqueradeHelper.stopMasquerading<Activity>()
+                 MasqueradeHelper.stopMasquerading<Activity>()
                 File(ContextKeeper.appContext.filesDir, "cache_masquerade").deleteRecursively()
 
                 // Clear caches

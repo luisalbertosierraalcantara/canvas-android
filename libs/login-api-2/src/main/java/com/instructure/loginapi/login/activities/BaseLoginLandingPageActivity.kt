@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -86,6 +87,7 @@ abstract class BaseLoginLandingPageActivity : AppCompatActivity(), ErrorReportDi
     protected abstract fun loginWithQRIntent(): Intent?
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("TAG", "BaseLoginLandingPageActivity | onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login_landing_page)
         bindViews()
@@ -164,6 +166,7 @@ abstract class BaseLoginLandingPageActivity : AppCompatActivity(), ErrorReportDi
     }
 
     private fun loadPreviousUsers() {
+        Log.d("TAG", "BaseLoginLandingPageActivity | loadPreviousUsers")
         val previousUsers = PreviousUsersUtils.get(this)
         resizePreviousUsersRecyclerView(previousUsers)
 
@@ -171,6 +174,7 @@ abstract class BaseLoginLandingPageActivity : AppCompatActivity(), ErrorReportDi
         previousLoginRecyclerView.adapter =
                 PreviousUsersAdapter(previousUsers, object : PreviousUsersAdapter.PreviousUsersEvents {
                     override fun onPreviousUserClick(user: SignedInUser) {
+                        Log.d("TAG", "BaseLoginLandingPageActivity | loadPreviousUsers | PreviousUsersAdapter | onPreviousUserClick")
                         ApiPrefs.protocol = user.protocol
                         ApiPrefs.user = user.user
                         ApiPrefs.domain = user.domain

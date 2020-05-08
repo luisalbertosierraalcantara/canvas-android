@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -59,6 +61,7 @@ public abstract class BaseLoginInitActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.d("TAG", "BaseLoginInitActivity | onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_init_login);
         applyTheme();
@@ -75,14 +78,18 @@ public abstract class BaseLoginInitActivity extends AppCompatActivity {
      * This function checks whether or not the current user is signed in.
      */
     private void checkLoginState() {
+        Log.d("TAG", "BaseLoginInitActivity | checkLoginState");
         final boolean isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
         if (BuildConfig.IS_TESTING || isDebuggable) {
             final String token = ApiPrefs.getValidToken();
             if (token.isEmpty()) {
+                Log.d("TAG", "BaseLoginInitActivity | checkLoginState | token is empty");
                 // Start Login Flow
                 startActivity(beginLoginFlowIntent());
             } else {
+                Log.d("TAG", "BaseLoginInitActivity | checkLoginState | token is NOT empty");
                 // Start App
+                Log.d("TAG", "BaseLoginInitActivity | checkLoginState | token is NOT empty | intent: " + launchApplicationMainActivityIntent().getData());
                 Intent intent = launchApplicationMainActivityIntent();
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -91,6 +98,7 @@ public abstract class BaseLoginInitActivity extends AppCompatActivity {
             // We only want to finish here on debug builds, our login bypass for UI testing depends
             // on a function called by this class, which then finishes the activity.
             // See loginWithToken() in Teacher's InitLoginActivity.
+            Log.d("TAG", "BaseLoginInitActivity | checkLoginState | isTesting: " + isTesting());
             if (!isTesting()) finish();
         } else {
             new Handler().postDelayed(new Runnable() {

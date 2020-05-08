@@ -23,6 +23,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.Loader
@@ -62,6 +63,7 @@ abstract class BaseRouterActivity : CallbackActivity(), FullScreenInteractions {
     protected abstract fun hideLoadingIndicator()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("TAG", "BaseRouterActivity | onCreate")
         super.onCreate(savedInstanceState)
         Logger.d("BaseRouterActivity: onCreate()")
 
@@ -84,6 +86,7 @@ abstract class BaseRouterActivity : CallbackActivity(), FullScreenInteractions {
     }
 
     override fun onNewIntent(intent: Intent) {
+        Log.d("TAG", "BaseRouterActivity | onNewIntent")
         super.onNewIntent(intent)
         setIntent(intent)
         Logger.d("BaseRouterActivity: onNewIntent()")
@@ -143,15 +146,19 @@ abstract class BaseRouterActivity : CallbackActivity(), FullScreenInteractions {
      * @param intent
      */
     private fun parse(intent: Intent?) {
+        Log.d("TAG", "BaseRouterActivity | parse")
         if (intent == null || intent.extras == null) return
 
         val extras = intent.extras!!
         Logger.logBundle(extras)
+
+        Log.d("TAG", "BaseRouterActivity | parse | intent action: ${intent.action}")
         
         if (intent.action == Const.INTENT_ACTION_STUDENT_VIEW) {
             // If someone is logged in, create a pending intent to launch into masquerading, then
             // switch out the current user
             if (ApiPrefs.user != null) {
+                Log.d("TAG", "BaseRouterActivity | parse | ApiPrefs user is NOT null")
                 // Totally restart the app so the masquerading will apply
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 val pendingIntent = PendingIntent.getActivity(ContextKeeper.appContext, 6660, intent, PendingIntent.FLAG_CANCEL_CURRENT)
@@ -162,6 +169,7 @@ abstract class BaseRouterActivity : CallbackActivity(), FullScreenInteractions {
                 return
             }
 
+            Log.d("TAG", "BaseRouterActivity | parse | ApiPrefs user IS null")
             // This is an intent from the Teacher app for viewing a course as a student
             val domain: String = extras.getString(Const.DOMAIN, "")
             val token: String = extras.getString(Const.TOKEN, "")
@@ -169,6 +177,7 @@ abstract class BaseRouterActivity : CallbackActivity(), FullScreenInteractions {
             val clientSecret = extras.getString(Const.CLIENT_SECRET, ApiPrefs.clientSecret)
             val courseId = extras.getLong(Const.COURSE_ID)
 
+            Log.d("TAG", "BaseRouterActivity | parse | Start masquerading")
             MasqueradeHelper.startMasquerading(
                 masqueradingUserId = -1, // This will be retrieved when we get the test user
                 masqueradingDomain = domain,

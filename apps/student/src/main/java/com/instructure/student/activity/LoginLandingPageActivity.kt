@@ -19,6 +19,7 @@ package com.instructure.student.activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import android.webkit.CookieManager
 import com.instructure.student.R
@@ -31,6 +32,7 @@ import com.instructure.pandautils.services.PushNotificationRegistrationService
 class LoginLandingPageActivity : BaseLoginLandingPageActivity() {
 
     override fun launchApplicationMainActivityIntent(): Intent {
+        Log.d("TAG", "LoginLandingPageActivity | launchApplicationMainActivityIntent")
         PushNotificationRegistrationService.scheduleJob(this, ApiPrefs.isMasquerading)
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

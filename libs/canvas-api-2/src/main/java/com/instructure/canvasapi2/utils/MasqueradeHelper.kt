@@ -21,6 +21,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import android.util.Log
 import android.webkit.CookieManager
 import com.instructure.canvasapi2.CanvasRestAdapter
 import com.instructure.canvasapi2.StatusCallback
@@ -40,7 +41,7 @@ object MasqueradeHelper {
     @JvmStatic
     @JvmOverloads
     fun <ACTIVITY : Activity> stopMasquerading(startingClass: Class<ACTIVITY>? = null) {
-        if (ApiPrefs.isStudentView) {
+         if (ApiPrefs.isStudentView) {
             // Clear out the Teacher's token so we don't invalidate it on logout
             ApiPrefs.accessToken = ""
         }
@@ -74,6 +75,8 @@ object MasqueradeHelper {
         courseId: Long? = null) {
         // Check to see if they're trying to switch domain as site admin, or masquerading as a test student from
         // a different domain
+        Log.d("TAG", "MasqueradeHelper | startMasquerading | masqueradeDomain: $masqueradingDomain")
+        Log.d("TAG", "MasqueradeHelper | startMasquerading | masqueradeToken: $masqueradeToken")
         if (!masqueradingDomain.isNullOrBlank()) {
             // If we don't set isMasquerading to true here the original domain will be set to the masquerading domain, even if trying to
             // masquerade fails
@@ -92,10 +95,12 @@ object MasqueradeHelper {
             if (ApiPrefs.isStudentView) {
                 ApiPrefs.isMasquerading = false // Turn this off so we don't append as_user_id when we get/create the test user account
                 // Make API call to get and/or create Test User account
+                Log.d("TAG", "MasqueradeHelper | startMasquerading | getTestUser")
                 UserManager.getTestUser(courseId, object : StatusCallback<User>() {
                     override fun onResponse(response: Response<User>, linkHeaders: LinkHeaders, type: ApiType) {
                         ApiPrefs.isMasquerading = true // Start adding the as_user_id url param
                         if (response.body() != null) {
+                            Log.d("TAG", "MasqueradeHelper | startMasquerading | getTestUser | onResponse | response body is NOT null")
                             cleanupMasquerading(ContextKeeper.appContext)
                             ApiPrefs.user = response.body()
                             ApiPrefs.masqueradeId = response.body()!!.id
@@ -104,6 +109,7 @@ object MasqueradeHelper {
                     }
 
                     override fun onFail(call: Call<User>?, error: Throwable, response: Response<*>?) {
+                        Log.d("TAG", "MasqueradeHelper | startMasquerading | getTestUser | onFail")
                         Logger.e("Error failed to get test user: " + error.message)
                         stopMasquerading(startingClass)
                     }
@@ -133,12 +139,14 @@ object MasqueradeHelper {
     }
 
     private fun <ACTIVITY : Activity> restartApplication(startingClass: Class<ACTIVITY>) {
+        Log.d("TAG", "MasqueradeHelper | restartApplication")
         // Totally restart the app so the masquerading will apply
         val startupIntent = Intent(ContextKeeper.appContext, startingClass)
-        startupIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        Log.d("TAG", "MasqueradeHelper | restartApplication | startingClass: $startingClass")
+        startupIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val pendingIntent = PendingIntent.getActivity(ContextKeeper.appContext, 6660, startupIntent, PendingIntent.FLAG_CANCEL_CURRENT)
         val alarmManager = ContextKeeper.appContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
+        alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 600, pendingIntent)
 
         // Delays the exit long enough for all the shared preferences to be saved and caches to be cleared.
         Handler().postDelayed({

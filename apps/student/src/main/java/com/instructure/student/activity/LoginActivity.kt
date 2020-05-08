@@ -56,6 +56,7 @@ class LoginActivity : BaseLoginInitActivity() {
     }
 
     override fun beginLoginFlowIntent(): Intent {
+        Log.d("TAG", "LoginActivity | beginLoginFlowIntent")
         return LoginLandingPageActivity.createIntent(this);
     }
 
@@ -75,6 +76,7 @@ class LoginActivity : BaseLoginInitActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("TAG", "LoginActivity | onCreate")
         val startNewRelic =
                 RemoteConfigUtils.getString(RemoteConfigParam.USE_NEW_RELIC)?.equals("true",ignoreCase = true) ?: false
 

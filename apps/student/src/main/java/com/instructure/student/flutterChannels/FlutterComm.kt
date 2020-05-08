@@ -65,10 +65,10 @@ object FlutterComm {
             return
         }
 
-        val userJson = JSONObject(Gson().toJson(ApiPrefs.user)).apply {
+        val userJson = if (ApiPrefs.user != null) JSONObject(Gson().toJson(ApiPrefs.user)).apply {
             // Convert ID from Long to String
             put("id", getLong("id").toString())
-        }
+        } else null
         val loginJson = JSONObject().apply {
             put("uuid", "")
             put("domain", ApiPrefs.fullDomain)
